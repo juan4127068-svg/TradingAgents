@@ -52,7 +52,7 @@ class TradingAgentsGraph:
 
     def __init__(
         self,
-        selected_analysts=["market", "social", "news", "fundamentals"],
+        selected_analysts=["market", "social", "news"],  # fundamentals removed for swing fork
         debug=False,
         config: Dict[str, Any] = None,
         callbacks: Optional[List] = None,
@@ -304,8 +304,16 @@ class TradingAgentsGraph:
         """Execute the graph and write the resulting state to disk and memory log."""
         # Initialize state — inject memory log context for PM.
         past_context = self.memory_log.get_past_context(company_name)
+        swing_config = {
+            "time_horizon":        self.config.get("time_horizon", "1-5 days"),
+            "max_hold_days":       self.config.get("max_hold_days", 5),
+            "min_rr_ratio":        self.config.get("min_rr_ratio", 2.0),
+            "stop_method":         self.config.get("stop_method", "atr"),
+            "atr_stop_multiplier": self.config.get("atr_stop_multiplier", 1.5),
+            "min_relative_volume": self.config.get("min_relative_volume", 1.5),
+        }
         init_agent_state = self.propagator.create_initial_state(
-            company_name, trade_date, past_context=past_context
+            company_name, trade_date, past_context=past_context, swing_config=swing_config
         )
         args = self.propagator.get_graph_args()
 

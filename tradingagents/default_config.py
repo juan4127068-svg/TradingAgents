@@ -47,4 +47,19 @@ DEFAULT_CONFIG = {
     "tool_vendors": {
         # Example: "get_stock_data": "alpha_vantage",  # Override category default
     },
+    # ── Swing trade configuration (fork additions) ────────────────────────────
+    "time_horizon":        "1-5 days",
+    "stop_method":         "atr",       # "atr" | "ma" (ma = upstream legacy)
+    "atr_stop_multiplier": 1.5,
+    "min_rr_ratio":        2.0,
+    "max_hold_days":       5,
+    "candle_timeframes":   ["15m", "1hr", "1d"],
+    "primary_entry_tf":    "1hr",
+    "trend_filter_tf":     "1d",
+    "min_relative_volume": 1.5,
+    "max_risk_per_trade":  0.02,        # 2% of account per trade
+    "account_size":        25000,
+    "data_provider":       "polygon",   # "polygon" | "yfinance"
+    "use_earnings_filter": True,
+    "earnings_buffer_days": 5,          # reject setups with earnings within N days
 }
