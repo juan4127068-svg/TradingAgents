@@ -1,3 +1,30 @@
+## SECURITY POLICY — Read Before Any Git or GitHub Operation
+
+> This applies to every session, every command, every push.
+
+```
+PRIVATE FORK — ALL WORK STAYS LOCAL AND IN OUR PRIVATE REPO ONLY.
+
+origin   = YOUR_USERNAME/swing-trading-agents  ← push here ONLY
+upstream = TauricResearch/TradingAgents         ← READ ONLY, never push
+
+PUSH LOCK — run once, enforced permanently:
+  git remote set-url --push upstream DISABLED
+
+FORBIDDEN — no exceptions:
+  git push upstream <anything>
+  gh pr create --repo TauricResearch/TradingAgents
+  gh issue create --repo TauricResearch/TradingAgents
+  Any write operation to any public repository
+
+VERIFY before every session:
+  git remote get-url --push upstream   # must print: DISABLED
+```
+
+Full rules are in `GIT_POLICY.md` — read it before any git operation.
+
+---
+
 # CLAUDE.md
 
 This file provides guidance to Claude Code (claude.ai/code) when working with code in this repository.
@@ -54,12 +81,12 @@ TradingAgents is a LangGraph-based multi-agent framework where specialized LLM a
 
 **Analysts (sequential)** → **Researchers (Bull/Bear debate)** → **Research Manager** → **Trader** → **Risk Mgmt (3-way debate)** → **Portfolio Manager** → final 5-tier rating signal
 
-The main entry point is `TradingAgentsGraph` in `tradingagents/graph/trading_graph.py`. Call `.propagate(company_name, trade_date)` — it returns a tuple `(final_state, signal)` where `signal` is the extracted rating string (`.process_signal()` is called internally). Analyst selection is controlled by the `selected_analysts` list passed to `TradingAgentsGraph.__init__()`, not via config. The graph is assembled dynamically in `graph/setup.py` from that list.
+The main entry point is `TradingAgentsGraph` in `tradingagents/graph/trading_graph.py`. Call `.propagate(company_name, trade_date)` to run a full analysis; use `.process_signal(full_signal)` to extract the rating from the output. The graph is assembled dynamically in `graph/setup.py` based on which analyst types are enabled in config.
 
 ### Key subsystems
 
 **`tradingagents/graph/`** — LangGraph orchestration
-- `trading_graph.py`: `TradingAgentsGraph` class — key public method: `propagate(company_name, trade_date)` returns `(final_state, signal)`; `process_signal` is called internally
+- `trading_graph.py`: `TradingAgentsGraph` class — key public methods: `propagate(company_name, trade_date)` and `process_signal(full_signal)`
 - `setup.py`: Constructs the StateGraph with nodes/edges per analyst selection
 - `conditional_logic.py`: Routing between debate rounds (configurable rounds per debate)
 - `checkpointer.py`: SQLite-backed resume via `langgraph-checkpoint-sqlite`; checkpoints stored at `~/.tradingagents/cache/checkpoints/<TICKER>.db`
