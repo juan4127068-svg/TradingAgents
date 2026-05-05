@@ -9,6 +9,7 @@ from typing import Annotated
 import os
 from .config import get_config
 from .utils import safe_ticker_component
+from .exceptions import DataValidationError
 
 logger = logging.getLogger(__name__)
 
@@ -89,6 +90,18 @@ def load_ohlcv(symbol: str, curr_date: str) -> pd.DataFrame:
 
     # Filter to curr_date to prevent look-ahead bias in backtesting
     data = data[data["Date"] <= curr_date_dt]
+
+    # Raise early rather than letting stockstats silently return NaN indicators
+    if data.empty:
+        raise DataValidationError(symbol, "OHLCV",
+            f"No data remains after filtering to {curr_date} — "
+            "check that the ticker is valid and the date is not before the listing date")
+
+    min_rows = 30
+    if len(data) < min_rows:
+        raise DataValidationError(symbol, "OHLCV",
+            f"Only {len(data)} rows available up to {curr_date}; "
+            f"need at least {min_rows} for reliable indicator calculation")
 
     return data
 
